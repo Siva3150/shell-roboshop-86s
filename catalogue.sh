@@ -9,6 +9,7 @@ USERID=$(id -u)
 
 LOGS_FOLDER="/var/log/shell-script-logs"
 SCRIPT_NAME=$( echo $0 | cut -d "." -f1 )
+SCRIPT_DIR=$PWD
 LOG_FILE="$LOGS_FOLDER/$SCRIPT_NAME.log" #/var/log/shell-script-logs/18-logs.log
 MONGODB_HOST=mongodb.sivadevops.space
 
@@ -68,7 +69,7 @@ VALIDATE $? "unzipping the code"
 npm install &>>$LOG_FILE
 VALIDATE $? "Installing dependencies"
 
-cp catalogue.service /etc/systemd/system/catalogue.service
+cp $SCRIPT_DIR/catalogue.service /etc/systemd/system/catalogue.service
 VALIDATE $? "Copying catalogue service"
 
 systemctl daemon-reload &>>$LOG_FILE
@@ -80,11 +81,19 @@ VALIDATE $? "Enabling catalogue"
 systemctl start catalogue &>>$LOG_FILE
 VALIDATE $? "Starting catalogue"
 
+cp $SCRIPT_DIR/mongo.repo /etc/yum.repos.d/mongo.repo
+VALIDATE $? "Copying mongo repo"
+
 dnf install mongodb-mongosh -y &>>$LOG_FILE
 VALIDATE $? "Installing mongodb client"
 
-mongosh --host $MONGODB_HOST </app/db/master-data.js
-VALIDATE $? "Loading schema"
+INDEX=$(mongosh mongodb.daws86s.fun --quiet --eval "db.getMongo().getDBNames().indexOf('catalogue')")
+if [ INDEX -le 0 ]; then 
+   mongosh --host $MONGODB_HOST </app/db/master-data.js 
+   VALIDATE $? "Loading schema"
+else 
+ echo  -e "Catalogue products already loaded ... $Y SKIPPING $N"
+fi 
 
 systemctl restart catalogue &>>$LOG_FILE
 VALIDATE $? "Restarting catalogue"
