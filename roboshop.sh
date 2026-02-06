@@ -1,6 +1,6 @@
 #!/bin/bash
 
-AMI_ID="ami-09c813fb71547fc4f"
+AMI_ID="ami-0220d79f3f480ecf5"
 SG_ID="sg-03f403f2be7db3bbc" # replace with your SG ID
 ZONE_ID="Z090071510OXTGFIDW0RR" # replace with your ID
 DOMAIN_NAME="sivadevops.space"
