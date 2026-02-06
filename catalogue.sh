@@ -32,53 +32,53 @@ VALIDATE(){ # functions receive inputs through args just like shell script args
 }
 
 ##### NodeJS ####
-dnf module disable nodejs -y
+dnf module disable nodejs -y &>>$LOG_FILE
 VALIDATE $? "Disabling default nodejs"
 
-dnf module enable nodejs:20 -y
+dnf module enable nodejs:20 -y &>>$LOG_FILE
 VALIDATE $? "Enabling nodejs 20"
 
-dnf install nodejs -y
+dnf install nodejs -y &>>$LOG_FILE
 VALIDATE $? "Installing nodejs"
 
 ### System user ###
-useradd --system --home /app --shell /sbin/nologin --comment "roboshop system user" roboshop
+useradd --system --home /app --shell /sbin/nologin --comment "roboshop system user" roboshop &>>$LOG_FILE
 VALIDATE $? "Creating roboshop user"
 
 mkdir /app 
-VALIDATE $? "moving to /app directory"
+VALIDATE $? "Creating /app directory"
 
-curl -o /tmp/catalogue.zip https://roboshop-artifacts.s3.amazonaws.com/catalogue-v3.zip 
+curl -o /tmp/catalogue.zip https://roboshop-artifacts.s3.amazonaws.com/catalogue-v3.zip &>>$LOG_FILE
 VALIDATE $? "Downloading code"
 
 mkdir /app 
-VALIDATE $? "moving to /app directory"
+VALIDATE $? "Changing to /app directory"
 
-unzip /tmp/catalogue.zip
+unzip /tmp/catalogue.zip &>>$LOG_FILE
 VALIDATE $? "unzipping the code"
 
-npm install 
+npm install &>>$LOG_FILE
 VALIDATE $? "Installing dependencies"
 
 cp catalogue.service /etc/systemd/system/catalogue.service
 VALIDATE $? "Copying catalogue service"
 
-systemctl daemon-reload
+systemctl daemon-reload &>>$LOG_FILE
 VALIDATE $? "daemon reload"
 
-systemctl enable catalogue 
+systemctl enable catalogue  &>>$LOG_FILE
 VALIDATE $? "Enabling catalogue"
 
-systemctl start catalogue
+systemctl start catalogue &>>$LOG_FILE
 VALIDATE $? "Starting catalogue"
 
-dnf install mongodb-mongosh -y
+dnf install mongodb-mongosh -y &>>$LOG_FILE
 VALIDATE $? "Installing mongodb client"
 
 mongosh --host $MONGODB_HOST </app/db/master-data.js
 VALIDATE $? "Loading schema"
 
-systemctl restart catalogue 
+systemctl restart catalogue &>>$LOG_FILE
 VALIDATE $? "Restarting catalogue"
 
 
